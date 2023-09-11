@@ -21,6 +21,7 @@ async fn main() -> anyhow::Result<()> {
         .context("Failed to connect to the database")?;
     debug!("✅Connection to the database is successful!");
 
+    // TODO: Faire une migration conditionnelle
     info!("Migrate database...");
     sqlx::migrate!("db/migrations").run(&db).await?;
 
