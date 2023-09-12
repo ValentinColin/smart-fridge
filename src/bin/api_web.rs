@@ -1,11 +1,8 @@
 //! # Entry point of the app
 use anyhow::Context;
 use log::{debug, info};
+use smart_fridge::http::app;
 use sqlx::postgres::PgPoolOptions;
-
-use crate::http::app;
-
-mod http;
 
 /// # Entry point
 #[tokio::main]

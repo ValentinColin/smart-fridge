@@ -6,7 +6,7 @@ FROM (VALUES
           ('Banane', CURRENT_DATE + 0),
           ('Yaourt', CURRENT_DATE + 7),
           ('Viande', CURRENT_DATE + 2),
-          ('Tomate', CURRENT_DATE - 1)
+          ('Tomate', CURRENT_DATE - 3)
       ) AS new_rows(name, expiration_date)
 WHERE NOT EXISTS (SELECT 1 FROM food);
 
