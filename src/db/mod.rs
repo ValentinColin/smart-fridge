@@ -1,7 +1,6 @@
 use anyhow::Context;
 use log::debug;
 use sqlx::PgPool;
-use std::sync::Arc;
 use time::Duration;
 
 /// Try to get the database URL from env vars.
@@ -58,9 +57,16 @@ pub fn get_db_url() -> anyhow::Result<String> {
     ))
 }
 
+/// A struct of parameters to cleanup the database.
+#[derive(impl_new::New)]
+pub struct CleanupParam {
+    pub food_expiration_period: Duration,
+    pub check_food_period: Duration,
+}
+
 /// Cleaning the fridge for food that has been out of date for a certain number of days.
-pub async fn cleanup(db: Arc<PgPool>, food_expiration_period: Duration) -> i64 {
-    let nb_deleted: (i64,) = sqlx::query_as(
+pub async fn cleanup(db: PgPool, food_expiration_period: Duration) -> i64 {
+    let req: (i64,) = sqlx::query_as(
         // language=PostgreSQL
         format!(
             r#"
@@ -75,9 +81,14 @@ pub async fn cleanup(db: Arc<PgPool>, food_expiration_period: Duration) -> i64 {
         )
         .as_str(),
     )
-    .fetch_one(&*db)
+    .fetch_one(&db)
     .await
     .unwrap();
+    let nb_deleted = req.0;
 
-    nb_deleted.0
+    if nb_deleted > 0 {
+        debug!("{} row(s) deleted by cleanup", nb_deleted);
+    }
+
+    nb_deleted
 }

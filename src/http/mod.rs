@@ -10,7 +10,7 @@
 //! | GET    | `/delete/:id` | Remove Food in the DB.     | Redirect to `/`                             |
 use axum::routing::{get, post};
 use axum::{Extension, Router};
-use sqlx::PgPool;
+use sqlx::{Pool, Postgres};
 
 pub mod error;
 pub mod food;
@@ -18,7 +18,7 @@ pub mod handler;
 pub mod template;
 
 /// Defines and returns the router of the app.
-pub fn app(db: PgPool) -> Router {
+pub fn app(db: Pool<Postgres>) -> Router {
     Router::new()
         .route("/test", get(|| async { "OK" }))
         .route("/", get(handler::list_food))

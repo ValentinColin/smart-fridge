@@ -1,0 +1,22 @@
+ARG RUST_VERSION=1.72.0
+ARG APP_NAME=fridge_supervisor
+FROM rust:${RUST_VERSION}-slim-bullseye AS build
+ARG APP_NAME
+WORKDIR /app
+
+RUN --mount=type=bind,source=src,target=src \
+    --mount=type=bind,source=db,target=db \
+    --mount=type=bind,source=templates,target=templates \
+    --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
+    --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
+    --mount=type=cache,target=/app/target/ \
+    --mount=type=cache,target=/usr/local/cargo/registry/ \
+    <<EOF
+set -e
+cargo build --locked --release --bin $APP_NAME
+cp ./target/release/$APP_NAME /bin/app
+EOF
+
+FROM debian:bullseye-slim AS runner
+COPY --from=build /bin/app /bin/
+CMD ["/bin/app"]

@@ -1,6 +1,5 @@
 use anyhow::Context;
 use sqlx::postgres::PgPoolOptions;
-use std::sync::Arc;
 use time::{ext::NumericalDuration, Duration};
 
 use smart_fridge::db::{cleanup, get_db_url};
@@ -14,15 +13,17 @@ struct CleanupParam {
 #[tokio::main]
 #[allow(unreachable_code)]
 async fn main() -> anyhow::Result<()> {
-    let db = Arc::new(
-        PgPoolOptions::new()
-            .max_connections(5)
-            .connect(&get_db_url()?)
-            .await
-            .context("Failed to connect to the database")?,
-    );
+    env_logger::init();
+    let db = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&get_db_url()?)
+        .await
+        .context("Failed to connect to the database")?;
 
     let cleanup_param = CleanupParam::new(3.days(), 1.hours());
+
+    // Wait init of the database from the web_api server
+    tokio::time::sleep(std::time::Duration::from_secs(30)).await;
 
     // TODO: Paramétrage statique ou dynamique ? API http pour modifié les paramètres ?
     // TODO: Ajouter une condition de fin de boucle ?

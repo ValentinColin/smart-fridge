@@ -8,7 +8,7 @@
 # Create a stage for building the application.
 
 ARG RUST_VERSION=1.72.0
-ARG APP_NAME=smart-fridge
+ARG APP_NAME=api_web
 FROM rust:${RUST_VERSION}-slim-bullseye AS build
 ARG APP_NAME
 WORKDIR /app
@@ -30,7 +30,7 @@ RUN --mount=type=bind,source=src,target=src \
     <<EOF
 set -e
 cargo build --locked --release
-cp ./target/release/$APP_NAME /bin/server
+cp ./target/release/$APP_NAME /bin/app
 EOF
 
 ################################################################################
@@ -44,13 +44,13 @@ EOF
 # most recent version of that tag when you build your Dockerfile. If
 # reproducability is important, consider using a digest
 # (e.g., debian@sha256:ac707220fbd7b67fc19b112cee8170b41a9e97f703f588b2cdbbcdcecdd8af57).
-FROM debian:bullseye-slim AS final
+FROM debian:bullseye-slim AS runner
 
 # Copy the executable from the "build" stage.
-COPY --from=build /bin/server /bin/
+COPY --from=build /bin/app /bin/
 
 # Expose the port that the application listens on.
 EXPOSE 80
 
 # What the container should run when it is started.
-CMD ["/bin/server"]
+CMD ["/bin/app"]
