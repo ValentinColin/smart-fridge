@@ -1,9 +1,10 @@
 [package]
 name = "smart-fridge"
 version = "1.0.0"
+description = "A tiny service to manage food in your fridge"
 authors = ["Valentin Colin <valentin.colin78@gmail.com>"]
 repository = "https://github.com/ValentinColin/smart-fridge"
-homepage = "https://github.com/ValentinColin/smart-fridge"
+documentation = "https://crates.io/crates/smart-fridge"
 edition = "2021"
 license = "MIT"
 
