@@ -10,7 +10,7 @@ license = "MIT"
 [dependencies]
 # Primary crates
 axum = { version = "0.6.20", features = ["macros"] }
- sqlx = { version = "0.7.1", features = ["runtime-tokio-rustls", "postgres", "chrono", "time"] }
+sqlx = { version = "0.7.1", features = ["runtime-tokio-rustls", "postgres", "chrono", "time"] }
 tokio = { version = "1.30.0", features = ["full"] }
 
 # Secondary crates
