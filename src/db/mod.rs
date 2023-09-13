@@ -58,7 +58,7 @@ pub fn get_db_url() -> anyhow::Result<String> {
     ))
 }
 
-///
+/// Cleaning the fridge for food that has been out of date for a certain number of days.
 pub async fn cleanup(db: Arc<PgPool>, food_expiration_period: Duration) -> i64 {
     let nb_deleted: (i64,) = sqlx::query_as(
         // language=PostgreSQL

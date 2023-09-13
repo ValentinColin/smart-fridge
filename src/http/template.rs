@@ -1,3 +1,5 @@
+//! Module to manage html template.
+
 use askama::Template;
 use axum::http::StatusCode;
 use axum::response::{Html, IntoResponse, Response};
@@ -18,7 +20,7 @@ impl FridgeTemplate {
     }
 }
 
-/// Transform a custom struct into a [`axum_core::response`].
+/// Transform [`FridgeTemplate`] into a [`Response`].
 impl IntoResponse for FridgeTemplate {
     fn into_response(self) -> Response {
         match self.render() {

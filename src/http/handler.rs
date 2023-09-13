@@ -1,3 +1,5 @@
+//! Define function that will react to each request according the route.
+
 use axum::extract::Path;
 use axum::response::Redirect;
 use axum::{Extension, Form};
