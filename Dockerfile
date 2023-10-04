@@ -7,9 +7,9 @@
 ################################################################################
 # Create a stage for building the application.
 
-ARG RUST_VERSION=1.72.0
+ARG RUST_VERSION=1.72.1
 ARG APP_NAME=api_web
-FROM rust:${RUST_VERSION}-slim-bullseye AS build
+FROM docker.io/rust:${RUST_VERSION} AS build
 ARG APP_NAME
 WORKDIR /app
 
@@ -22,7 +22,6 @@ WORKDIR /app
 # output directory before the cache mounted /app/target is unmounted.
 RUN --mount=type=bind,source=src,target=src \
     --mount=type=bind,source=db,target=db \
-    --mount=type=bind,source=templates,target=templates \
     --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
     --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
     --mount=type=cache,target=/app/target/ \
@@ -44,7 +43,10 @@ EOF
 # most recent version of that tag when you build your Dockerfile. If
 # reproducability is important, consider using a digest
 # (e.g., debian@sha256:ac707220fbd7b67fc19b112cee8170b41a9e97f703f588b2cdbbcdcecdd8af57).
-FROM debian:bullseye-slim AS runner
+
+# TODO: try gcr.io/distroless/{static, base, cc} (cc seems needed for rust app)
+FROM gcr.io/distroless/cc-debian12:nonroot AS runner
+#FROM debian:bookworm-slim AS runner
 
 # Copy the executable from the "build" stage.
 COPY --from=build /bin/app /bin/

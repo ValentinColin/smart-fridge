@@ -13,8 +13,4 @@ pub enum Error {
     /// Similarly, we don't want to report random `anyhow` errors to the user.
     #[error("an internal server error occurred")]
     Anyhow(#[from] anyhow::Error),
-
-    /// Template engine error
-    #[error("an internal server error occurred")]
-    Askama(#[from] askama::Error),
 }

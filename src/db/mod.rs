@@ -84,6 +84,7 @@ pub async fn cleanup(db: PgPool, food_expiration_period: Duration) -> i64 {
     .fetch_one(&db)
     .await
     .unwrap();
+
     let nb_deleted = req.0;
 
     if nb_deleted > 0 {
