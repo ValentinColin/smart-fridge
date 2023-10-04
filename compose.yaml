@@ -1,6 +1,7 @@
 services:
   server:
-    image: docker.io/valentincolin/smart-fridge-server:1.2.0
+    #image: docker.io/valentincolin/smart-fridge-server:2.0.0
+    image: smart-fridge-server-test:2.0.0
     build:
       context: .
       dockerfile: Dockerfile
@@ -20,7 +21,8 @@ services:
       RUST_LOG: smart_fridge=debug,api_web=debug,fridge_supervisor=debug  # careful: '-' become '_'
 
   server_supervisor:
-    image: docker.io/valentincolin/smart-fridge-server_supervisor:1.2.0
+    #image: docker.io/valentincolin/smart-fridge-server_supervisor:2.0.0
+    image: smart-fridge-server_supervisor-test:2.0.0
     build:
       context: .
       dockerfile: Dockerfile.supervisor

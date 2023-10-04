@@ -1,30 +1,47 @@
-//! # Web API
+//! # Routes
 //!
-//! ## Routes
-//!
-//! | METHOD | ROUTE         | WORK                       | RETURN                                      |
-//! |--------|---------------|----------------------------|---------------------------------------------|
-//! | GET    | `/test`       |                            | Only return -> "OK"                         |
-//! | GET    | `/`           | Get Food in fridge from DB | Return a page that list Food in the fridge  |
-//! | POST   | `/`           | Add Food in the DB.        | Redirect to `/`                             |
-//! | GET    | `/delete/:id` | Remove Food in the DB.     | Redirect to `/`                             |
-use axum::routing::{get, post};
+//! | METHOD | ROUTE               | DESCRIPTION                                 | RETURN                   |
+//! |--------|---------------------|---------------------------------------------|--------------------------|
+//! | GET    | /api/v2/healthcheck | Used to check the health of the http server | (200, body: "OK")        |
+//! | GET    | /api/v2/food        | Get all row/food from the database          | (200, body: JSON) or 500 |
+//! | POST   | /api/v2/food        | Add food in the database                    | 204 or 500               |
+//! | GET    | /api/v2/food/:uuid  | Get one row/food from the database          | (200, body: JSON) or 500 |
+//! | DELETE | /api/v2/food/:uuid  | Delete on row/food in the database          | 204 or 500               |
+use axum::http::StatusCode;
+use axum::routing::get;
 use axum::{Extension, Router};
-use sqlx::{Pool, Postgres};
+use sqlx::PgPool;
+
+use crate::API_PREFIX;
 
 pub mod error;
 pub mod food;
 pub mod handler;
-pub mod template;
 
 /// Defines and returns the router of the app.
-pub fn app(db: Pool<Postgres>) -> Router {
+pub fn app(db: PgPool) -> Router {
     Router::new()
-        .route("/test", get(|| async { "OK" }))
-        .route("/", get(handler::list_food))
-        .route("/", post(handler::add_food))
-        .route("/delete/:id", get(handler::delete_food))
-        .layer(Extension(db))
+        // common route
+        .route(
+            format!("{API_PREFIX}/healthcheck").as_str(),
+            get(|| async { (StatusCode::OK, "OK") }),
+        )
+        // cleanup param route
+        //.route("/api/v2/cleanup/period", put(|| async { StatusCode::NOT_IMPLEMENTED }))  // TODO
+        //.route("/api/v2/cleanup/expiration", put(|| async { StatusCode::NOT_IMPLEMENTED }))  // TODO
+        // app route
+        .route(
+            format!("{API_PREFIX}/food").as_str(),
+            get(handler::list_food).post(handler::add_food),
+        )
+        .route(
+            format!("{API_PREFIX}/food/:id").as_str(),
+            get(handler::get_food)
+                //.put(handler::update_food),  // TODO
+                .delete(handler::delete_food),
+        )
+        // Middleware
+        .layer(Extension(db)) // Share the db across handlers
 }
 
 #[cfg(test)]
@@ -48,7 +65,12 @@ mod tests {
         // `Router` implements `tower::Service<Request<Body>>` so we can
         // call it like any tower service, no need to run an HTTP server.
         let response = app
-            .oneshot(Request::builder().uri("/test").body(Body::empty()).unwrap())
+            .oneshot(
+                Request::builder()
+                    .uri("/api/v2/healthcheck")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
             .await
             .unwrap();
 
